@@ -23,6 +23,7 @@ body {
     overflow-x: hidden;
     line-height: 1.8;
     position: relative;
+    padding-bottom: 6rem;
 }
 
 /* Fondo con textura premium */
@@ -556,6 +557,17 @@ body::before {
     .flor-interactiva {
         bottom: 1.5rem;
         left: 1.5rem;
+    }
+
+    .control-musica {
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+
+    .flor-mensaje {
+        bottom: 6.5rem;
+        left: 1.5rem;
+        max-width: 220px;
     }
 
     .modal-contenido {

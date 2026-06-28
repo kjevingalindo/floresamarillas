@@ -8,21 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaying = false;
 
     const controlMusic = document.querySelector('.control-musica');
-    const musicIcon = controlMusic.querySelector('i');
+    const musicIcon = controlMusic ? controlMusic.querySelector('i') : null;
     const florInteractiva = document.querySelector('.flor-interactiva');
     const florMensaje = document.querySelector('.flor-mensaje');
     const modal = document.getElementById('modal-regalo');
     const modalCerrar = document.querySelector('.modal-cerrar');
     const imagenHero = document.querySelector('.imagen-hero');
     const imagenHeroImg = document.querySelector('.imagen-hero img');
+
     const ajustarImagenAlScroll = () => {
+        if (!imagenHero || !imagenHeroImg) return;
+
         const scrollY = window.scrollY;
         const alturaVentana = window.innerHeight;
-        const proporcion = 1 + (scrollY / (alturaVentana * 2)); 
+        const proporcion = 1 + (scrollY / (alturaVentana * 2));
         const escala = Math.min(proporcion, 1.5);
-        
+
         imagenHero.style.transform = `scale(${escala})`;
-        imagenHeroImg.style.transform = `scale(${1 + (escala - 1) * 0.5})`; 
+        imagenHeroImg.style.transform = `scale(${1 + (escala - 1) * 0.5})`;
     };
 
     window.addEventListener('scroll', ajustarImagenAlScroll);
@@ -33,49 +36,78 @@ document.addEventListener('DOMContentLoaded', () => {
             audioPlayer.play().then(() => {
                 musicStarted = true;
                 isPlaying = true;
-                musicIcon.classList.remove('fa-music');
-                musicIcon.classList.add('fa-pause');
-            }).catch(e => console.log(e));
+                if (musicIcon) {
+                    musicIcon.classList.remove('fa-music');
+                    musicIcon.classList.add('fa-pause');
+                }
+            }).catch(() => {
+                if (musicIcon) {
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
+                }
+            });
         }
     };
 
-    controlMusic.addEventListener('click', () => {
-        if (!musicStarted) {
-            startMusic();
-        } else if (isPlaying) {
-            audioPlayer.pause();
-            isPlaying = false;
-            musicIcon.classList.remove('fa-pause');
-            musicIcon.classList.add('fa-play');
-        } else {
-            audioPlayer.play();
-            isPlaying = true;
-            musicIcon.classList.remove('fa-play');
-            musicIcon.classList.add('fa-pause');
-        }
-    });
-    florInteractiva.addEventListener('click', () => {
-        modal.classList.add('mostrar');
-        crearParticulasDoradas();
-        florMensaje.classList.add('mostrar');
-        setTimeout(() => {
-            florMensaje.classList.remove('mostrar');
-        }, 3000);
-    });
-    modalCerrar.addEventListener('click', () => {
-        modal.classList.remove('mostrar');
-    });
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+    if (controlMusic) {
+        controlMusic.addEventListener('click', () => {
+            if (!musicStarted) {
+                startMusic();
+            } else if (isPlaying) {
+                audioPlayer.pause();
+                isPlaying = false;
+                if (musicIcon) {
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
+                }
+            } else {
+                audioPlayer.play();
+                isPlaying = true;
+                if (musicIcon) {
+                    musicIcon.classList.remove('fa-play');
+                    musicIcon.classList.add('fa-pause');
+                }
+            }
+        });
+    }
+
+    if (florInteractiva && modal && florMensaje) {
+        florInteractiva.addEventListener('click', () => {
+            modal.classList.add('mostrar');
+            crearParticulasDoradas();
+            florMensaje.classList.add('mostrar');
+            setTimeout(() => {
+                florMensaje.classList.remove('mostrar');
+            }, 3000);
+        });
+    }
+
+    if (modalCerrar && modal) {
+        modalCerrar.addEventListener('click', () => {
             modal.classList.remove('mostrar');
-        }
-    });
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('mostrar');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                modal.classList.remove('mostrar');
+            }
+        });
+    }
 
     window.addEventListener('scroll', () => {
         if (!musicStarted) {
             startMusic();
         }
     });
+
     const crearParticulasDoradas = () => {
         for (let i = 0; i < 30; i++) {
             setTimeout(() => {
@@ -87,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const left = Math.random() * 100;
                 particula.style.left = `${left}%`;
                 particula.style.animationDuration = `${Math.random() * 3 + 5}s`;
-                
+
                 document.body.appendChild(particula);
                 setTimeout(() => {
                     particula.remove();
@@ -97,19 +129,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const secciones = document.querySelectorAll('.seccion');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.1 });
+    if (typeof IntersectionObserver !== 'undefined') {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
 
-    secciones.forEach(seccion => observer.observe(seccion));
+        secciones.forEach(seccion => observer.observe(seccion));
+    }
 
     function crearPetalos() {
         const contenedor = document.querySelector('.flotantes');
-        
+        if (!contenedor) return;
+
         for (let i = 0; i < 15; i++) {
             setTimeout(() => {
                 const petalo = document.createElement('div');
@@ -132,11 +167,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!audioPlayer.paused) {
                 audioPlayer.pause();
                 isPlaying = false;
-                musicIcon.classList.remove('fa-pause');
-                musicIcon.classList.add('fa-play');
+                if (musicIcon) {
+                    musicIcon.classList.remove('fa-pause');
+                    musicIcon.classList.add('fa-play');
+                }
             }
         }
     });
+
     setTimeout(() => {
         crearParticulasDoradas();
     }, 1000);
